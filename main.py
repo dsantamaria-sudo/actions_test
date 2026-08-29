@@ -1,15 +1,15 @@
 import sys
-from datetime import datetime
 from pathlib import Path
-from torchvision import transforms
-from data.dataLoader import create_dataloaders, create_food101_dataloaders
-from utils.utils import display_random_images, train
-from model.model import tinyConvNeXt
-from model.model_v1 import tinyConvNeXtMod
+
 import torch
-from torch import nn
 from azure.ai.ml import MLClient
 from azure.identity import DefaultAzureCredential
+from torch import nn
+from torchvision import transforms
+
+from data.dataLoader import create_food101_dataloaders
+from model.model import tinyConvNeXt
+from utils.utils import train
 
 # mlflow prints run URLs with emoji; Windows consoles default to cp1252, which
 # can't encode them and crashes the run right as it finishes.

@@ -1,6 +1,6 @@
+import mlflow.pyfunc
 import numpy as np
 import torch
-import mlflow.pyfunc
 
 
 class SoftmaxClassifier(mlflow.pyfunc.PythonModel):

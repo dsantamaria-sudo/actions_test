@@ -1,7 +1,7 @@
 
 import torch
 from torch import nn
-from torchvision.models import convnext_small, ConvNeXt_Small_Weights
+from torchvision.models import ConvNeXt_Small_Weights, convnext_small
 
 CONVNEXT_S_WEIGHTS = ConvNeXt_Small_Weights.IMAGENET1K_V1
 

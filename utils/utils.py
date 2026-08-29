@@ -1,16 +1,17 @@
-import torch
-from torch import nn
-from typing import Callable, Dict, List, Optional
 import random
 import tempfile
 import time
+from collections.abc import Callable
 from pathlib import Path
+
+import torch
+from torch import nn
 from torchmetrics.classification import (
-    MulticlassPrecision,
-    MulticlassRecall,
-    MulticlassF1Score,
     MulticlassAUROC,
     MulticlassConfusionMatrix,
+    MulticlassF1Score,
+    MulticlassPrecision,
+    MulticlassRecall,
 )
 
 # matplotlib, mlflow and model.serving are imported lazily inside the functions
@@ -21,7 +22,7 @@ from torchmetrics.classification import (
 
 
 def display_random_images(dataloader: torch.utils.data.DataLoader,
-                           classes: List[str] = None,
+                           classes: list[str] = None,
                            n: int = 10,
                            display_shape: bool = True,
                            seed: int = None):
@@ -32,7 +33,7 @@ def display_random_images(dataloader: torch.utils.data.DataLoader,
     if n > 10:
         n = 10
         display_shape = False
-        print(f"For display, purposes, n shouldn't be larger than 10, setting to 10 and removing shape display.")
+        print("For display, purposes, n shouldn't be larger than 10, setting to 10 and removing shape display.")
 
     # 3. Set the seed
     if seed:
@@ -80,7 +81,7 @@ def train_step(model: nn.Module,
                num_classes: int,
                accuracy_fn: Callable = accuracy_fn,
                average: str = "macro",
-               device: torch.device = "cpu") -> Dict[str, float]:
+               device: torch.device = "cpu") -> dict[str, float]:
 
     model.train()
     train_loss, train_acc = 0.0, 0.0
@@ -147,7 +148,7 @@ def test_step(model: nn.Module,
               accuracy_fn: Callable = accuracy_fn,
               average: str = "macro",
               device: torch.device = "cpu",
-              track_confusion_matrix: bool = False) -> Dict[str, float]:
+              track_confusion_matrix: bool = False) -> dict[str, float]:
 
     model.eval()
     test_loss, test_acc = 0.0, 0.0
@@ -214,18 +215,18 @@ def train(model: nn.Module,
           test_dataloader: torch.utils.data.DataLoader,
           optimizer: torch.optim.Optimizer,
           num_classes: int,
-          class_names: Optional[List[str]] = None,
+          class_names: list[str] | None = None,
           accuracy_fn: Callable = accuracy_fn,
           loss_fn: nn.Module = nn.CrossEntropyLoss(),
           epochs: int = 5,
           average: str = "macro",
           device: torch.device = "cpu",
           experiment_name: str = "model_training",
-          run_name: Optional[str] = None,
-          dataset_name: Optional[str] = None,
-          registered_model_name: Optional[str] = None,
-          scheduler: Optional[torch.optim.lr_scheduler.LRScheduler] = None,
-          tracking_uri: Optional[str] = None) -> Dict[str, List[float]]:
+          run_name: str | None = None,
+          dataset_name: str | None = None,
+          registered_model_name: str | None = None,
+          scheduler: torch.optim.lr_scheduler.LRScheduler | None = None,
+          tracking_uri: str | None = None) -> dict[str, list[float]]:
 
     import matplotlib.pyplot as plt
     import mlflow
@@ -233,6 +234,7 @@ def train(model: nn.Module,
     from mlflow.models import infer_signature
     from mlflow.store.artifact.runs_artifact_repo import RunsArtifactRepository
     from tqdm.auto import tqdm
+
     from model.serving import SoftmaxClassifier
 
     metric_keys = ["loss", "acc", "precision", "recall", "f1", "auroc"]

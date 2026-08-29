@@ -1,4 +1,3 @@
-import os
 from torch.utils.data import DataLoader, Subset
 from torchvision import datasets
 from torchvision.datasets import Food101
