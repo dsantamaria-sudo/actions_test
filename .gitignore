@@ -1,0 +1,26 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Secrets
+.env
+
+# folders
+data/food101/
+data/pizza_steak_sushi/
+docker/
+.dockerignore
+container_app_deployment.zip
+mlruns/
+model/model_v1.py
+utils/load_model.bat
+mlflow.db
+mlruns/
+*.bat
