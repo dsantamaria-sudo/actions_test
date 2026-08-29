@@ -50,7 +50,7 @@ def main():
 
     BATCH_SIZE = 32
 
-    train_dataloader, test_dataloader, class_names, class_dict = create_food101_dataloaders(
+    train_dataloader, test_dataloader, class_names = create_food101_dataloaders(
                                                                     data_dir=food101_dir,
                                                                     classes=CLASSES,
                                                                     train_transform=train_transform,
