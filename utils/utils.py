@@ -20,12 +20,13 @@ from torchmetrics.classification import (
 # free of the MLflow + plotting dependency stack.
 
 
-
-def display_random_images(dataloader: torch.utils.data.DataLoader,
-                           classes: list[str] | None = None,
-                           n: int = 10,
-                           display_shape: bool = True,
-                           seed: int | None = None):
+def display_random_images(
+    dataloader: torch.utils.data.DataLoader,
+    classes: list[str] | None = None,
+    n: int = 10,
+    display_shape: bool = True,
+    seed: int | None = None,
+):
 
     import matplotlib.pyplot as plt
 
@@ -33,7 +34,9 @@ def display_random_images(dataloader: torch.utils.data.DataLoader,
     if n > 10:
         n = 10
         display_shape = False
-        print("For display, purposes, n shouldn't be larger than 10, setting to 10 and removing shape display.")
+        print(
+            "For display, purposes, n shouldn't be larger than 10, setting to 10 and removing shape display."
+        )
 
     # 3. Set the seed
     if seed:
@@ -54,10 +57,12 @@ def display_random_images(dataloader: torch.utils.data.DataLoader,
         targ_image, targ_label = image_batch[targ_sample], label_batch[targ_sample]
 
         # 8. Adjust tensor dimensions for plotting
-        targ_image_adjust = targ_image.permute(1, 2, 0) # [color_channels, height, width] -> [height, width, color_channels]
+        targ_image_adjust = targ_image.permute(
+            1, 2, 0
+        )  # [color_channels, height, width] -> [height, width, color_channels]
 
         # Plot adjusted samples
-        plt.subplot(1, n, i+1)
+        plt.subplot(1, n, i + 1)
         plt.imshow(targ_image_adjust)
         plt.axis("off")
         if classes:
@@ -74,24 +79,34 @@ def accuracy_fn(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
     return (correct / len(y_pred)) * 100
 
 
-def train_step(model: nn.Module,
-               dataloader: torch.utils.data.DataLoader,
-               loss_fn: nn.Module,
-               optimizer: torch.optim.Optimizer,
-               num_classes: int,
-               accuracy_fn: Callable = accuracy_fn,
-               average: str = "macro",
-               device: torch.device = "cpu") -> dict[str, float]:
+def train_step(
+    model: nn.Module,
+    dataloader: torch.utils.data.DataLoader,
+    loss_fn: nn.Module,
+    optimizer: torch.optim.Optimizer,
+    num_classes: int,
+    accuracy_fn: Callable = accuracy_fn,
+    average: str = "macro",
+    device: torch.device = "cpu",
+) -> dict[str, float]:
 
     model.train()
     train_loss, train_acc = 0.0, 0.0
 
-    precision_metric = MulticlassPrecision(num_classes=num_classes, average=average).to(device)
-    recall_metric = MulticlassRecall(num_classes=num_classes, average=average).to(device)
+    precision_metric = MulticlassPrecision(num_classes=num_classes, average=average).to(
+        device
+    )
+    recall_metric = MulticlassRecall(num_classes=num_classes, average=average).to(
+        device
+    )
     f1_metric = MulticlassF1Score(num_classes=num_classes, average=average).to(device)
     auroc_metric = MulticlassAUROC(num_classes=num_classes, average=average).to(device)
-    precision_per_class = MulticlassPrecision(num_classes=num_classes, average=None).to(device)
-    recall_per_class = MulticlassRecall(num_classes=num_classes, average=None).to(device)
+    precision_per_class = MulticlassPrecision(num_classes=num_classes, average=None).to(
+        device
+    )
+    recall_per_class = MulticlassRecall(num_classes=num_classes, average=None).to(
+        device
+    )
     f1_per_class = MulticlassF1Score(num_classes=num_classes, average=None).to(device)
     auroc_per_class = MulticlassAUROC(num_classes=num_classes, average=None).to(device)
 
@@ -141,29 +156,41 @@ def train_step(model: nn.Module,
     }
 
 
-def test_step(model: nn.Module,
-              dataloader: torch.utils.data.DataLoader,
-              loss_fn: nn.Module,
-              num_classes: int,
-              accuracy_fn: Callable = accuracy_fn,
-              average: str = "macro",
-              device: torch.device = "cpu",
-              track_confusion_matrix: bool = False) -> dict[str, float]:
+def test_step(
+    model: nn.Module,
+    dataloader: torch.utils.data.DataLoader,
+    loss_fn: nn.Module,
+    num_classes: int,
+    accuracy_fn: Callable = accuracy_fn,
+    average: str = "macro",
+    device: torch.device = "cpu",
+    track_confusion_matrix: bool = False,
+) -> dict[str, float]:
 
     model.eval()
     test_loss, test_acc = 0.0, 0.0
 
-    precision_metric = MulticlassPrecision(num_classes=num_classes, average=average).to(device)
-    recall_metric = MulticlassRecall(num_classes=num_classes, average=average).to(device)
+    precision_metric = MulticlassPrecision(num_classes=num_classes, average=average).to(
+        device
+    )
+    recall_metric = MulticlassRecall(num_classes=num_classes, average=average).to(
+        device
+    )
     f1_metric = MulticlassF1Score(num_classes=num_classes, average=average).to(device)
     auroc_metric = MulticlassAUROC(num_classes=num_classes, average=average).to(device)
-    precision_per_class = MulticlassPrecision(num_classes=num_classes, average=None).to(device)
-    recall_per_class = MulticlassRecall(num_classes=num_classes, average=None).to(device)
+    precision_per_class = MulticlassPrecision(num_classes=num_classes, average=None).to(
+        device
+    )
+    recall_per_class = MulticlassRecall(num_classes=num_classes, average=None).to(
+        device
+    )
     f1_per_class = MulticlassF1Score(num_classes=num_classes, average=None).to(device)
     auroc_per_class = MulticlassAUROC(num_classes=num_classes, average=None).to(device)
 
     confusion_matrix_metric = (
-        MulticlassConfusionMatrix(num_classes=num_classes).to(device) if track_confusion_matrix else None
+        MulticlassConfusionMatrix(num_classes=num_classes).to(device)
+        if track_confusion_matrix
+        else None
     )
 
     with torch.inference_mode():
@@ -210,23 +237,25 @@ def test_step(model: nn.Module,
     return results
 
 
-def train(model: nn.Module,
-          train_dataloader: torch.utils.data.DataLoader,
-          test_dataloader: torch.utils.data.DataLoader,
-          optimizer: torch.optim.Optimizer,
-          num_classes: int,
-          class_names: list[str] | None = None,
-          accuracy_fn: Callable = accuracy_fn,
-          loss_fn: nn.Module | None = None,
-          epochs: int = 5,
-          average: str = "macro",
-          device: torch.device = "cpu",
-          experiment_name: str = "model_training",
-          run_name: str | None = None,
-          dataset_name: str | None = None,
-          registered_model_name: str | None = None,
-          scheduler: torch.optim.lr_scheduler.LRScheduler | None = None,
-          tracking_uri: str | None = None) -> dict[str, list[float]]:
+def train(
+    model: nn.Module,
+    train_dataloader: torch.utils.data.DataLoader,
+    test_dataloader: torch.utils.data.DataLoader,
+    optimizer: torch.optim.Optimizer,
+    num_classes: int,
+    class_names: list[str] | None = None,
+    accuracy_fn: Callable = accuracy_fn,
+    loss_fn: nn.Module | None = None,
+    epochs: int = 5,
+    average: str = "macro",
+    device: torch.device = "cpu",
+    experiment_name: str = "model_training",
+    run_name: str | None = None,
+    dataset_name: str | None = None,
+    registered_model_name: str | None = None,
+    scheduler: torch.optim.lr_scheduler.LRScheduler | None = None,
+    tracking_uri: str | None = None,
+) -> dict[str, list[float]]:
 
     import matplotlib.pyplot as plt
     import mlflow
@@ -242,7 +271,8 @@ def train(model: nn.Module,
     results.update({f"test_{k}": [] for k in metric_keys})
 
     class_labels = (
-        class_names if class_names and len(class_names) == num_classes
+        class_names
+        if class_names and len(class_names) == num_classes
         else [f"class_{i}" for i in range(num_classes)]
     )
 
@@ -253,7 +283,9 @@ def train(model: nn.Module,
     else:
         mlflow.set_tracking_uri("sqlite:///mlflow.db")
         if mlflow.get_experiment_by_name(experiment_name) is None:
-            mlflow.create_experiment(experiment_name, artifact_location=Path("mlruns").resolve().as_uri())
+            mlflow.create_experiment(
+                experiment_name, artifact_location=Path("mlruns").resolve().as_uri()
+            )
     mlflow.set_experiment(experiment_name)
 
     with mlflow.start_run(run_name=run_name):
@@ -267,54 +299,66 @@ def train(model: nn.Module,
             "dataset_name": dataset_name,
             "train_data_dir": str(getattr(train_dataset, "root", "")) or None,
             "test_data_dir": str(getattr(test_dataset, "root", "")) or None,
-            "num_train_samples": len(train_dataset) if train_dataset is not None else None,
+            "num_train_samples": len(train_dataset)
+            if train_dataset is not None
+            else None,
             "num_test_samples": len(test_dataset) if test_dataset is not None else None,
         }
         dataset_params = {k: v for k, v in dataset_params.items() if v is not None}
 
-        mlflow.log_params({
-            "model": model.__class__.__name__,
-            "loss_fn": loss_fn.__class__.__name__,
-            "optimizer": optimizer.__class__.__name__,
-            "lr": optimizer_params.get("lr"),
-            "weight_decay": optimizer_params.get("weight_decay"),
-            "scheduler": scheduler.__class__.__name__ if scheduler is not None else "None",
-            "batch_size": train_dataloader.batch_size,
-            "epochs": epochs,
-            "device": str(device),
-            "num_classes": num_classes,
-            "metric_average": average,
-            **dataset_params,
-        })
+        mlflow.log_params(
+            {
+                "model": model.__class__.__name__,
+                "loss_fn": loss_fn.__class__.__name__,
+                "optimizer": optimizer.__class__.__name__,
+                "lr": optimizer_params.get("lr"),
+                "weight_decay": optimizer_params.get("weight_decay"),
+                "scheduler": scheduler.__class__.__name__
+                if scheduler is not None
+                else "None",
+                "batch_size": train_dataloader.batch_size,
+                "epochs": epochs,
+                "device": str(device),
+                "num_classes": num_classes,
+                "metric_average": average,
+                **dataset_params,
+            }
+        )
 
         test_metrics = {}
         for epoch in tqdm(range(epochs)):
             epoch_start = time.time()
 
-            train_metrics = train_step(model=model,
-                                        dataloader=train_dataloader,
-                                        loss_fn=loss_fn,
-                                        optimizer=optimizer,
-                                        num_classes=num_classes,
-                                        accuracy_fn=accuracy_fn,
-                                        average=average,
-                                        device=device)
+            train_metrics = train_step(
+                model=model,
+                dataloader=train_dataloader,
+                loss_fn=loss_fn,
+                optimizer=optimizer,
+                num_classes=num_classes,
+                accuracy_fn=accuracy_fn,
+                average=average,
+                device=device,
+            )
 
             is_last_epoch = epoch == epochs - 1
-            test_metrics = test_step(model=model,
-                                      dataloader=test_dataloader,
-                                      loss_fn=loss_fn,
-                                      num_classes=num_classes,
-                                      accuracy_fn=accuracy_fn,
-                                      average=average,
-                                      device=device,
-                                      track_confusion_matrix=is_last_epoch)
+            test_metrics = test_step(
+                model=model,
+                dataloader=test_dataloader,
+                loss_fn=loss_fn,
+                num_classes=num_classes,
+                accuracy_fn=accuracy_fn,
+                average=average,
+                device=device,
+                track_confusion_matrix=is_last_epoch,
+            )
 
             epoch_time = time.time() - epoch_start
 
-            print(f"Epoch: {epoch} | "
-                  f"Train loss: {train_metrics['loss']:.2f} | Train acc: {train_metrics['acc']:.2f}% | "
-                  f"Test loss: {test_metrics['loss']:.2f} | Test acc: {test_metrics['acc']:.2f}%")
+            print(
+                f"Epoch: {epoch} | "
+                f"Train loss: {train_metrics['loss']:.2f} | Train acc: {train_metrics['acc']:.2f}% | "
+                f"Test loss: {test_metrics['loss']:.2f} | Test acc: {test_metrics['acc']:.2f}%"
+            )
 
             metrics_to_log = {
                 "loss/train": round(train_metrics["loss"], 2),
@@ -337,14 +381,30 @@ def train(model: nn.Module,
                 scheduler.step()
 
             for i, label in enumerate(class_labels):
-                metrics_to_log[f"precision/train/{label}"] = round(train_metrics["precision_per_class"][i], 2)
-                metrics_to_log[f"recall/train/{label}"] = round(train_metrics["recall_per_class"][i], 2)
-                metrics_to_log[f"f1/train/{label}"] = round(train_metrics["f1_per_class"][i], 2)
-                metrics_to_log[f"auroc/train/{label}"] = round(train_metrics["auroc_per_class"][i], 2)
-                metrics_to_log[f"precision/test/{label}"] = round(test_metrics["precision_per_class"][i], 2)
-                metrics_to_log[f"recall/test/{label}"] = round(test_metrics["recall_per_class"][i], 2)
-                metrics_to_log[f"f1/test/{label}"] = round(test_metrics["f1_per_class"][i], 2)
-                metrics_to_log[f"auroc/test/{label}"] = round(test_metrics["auroc_per_class"][i], 2)
+                metrics_to_log[f"precision/train/{label}"] = round(
+                    train_metrics["precision_per_class"][i], 2
+                )
+                metrics_to_log[f"recall/train/{label}"] = round(
+                    train_metrics["recall_per_class"][i], 2
+                )
+                metrics_to_log[f"f1/train/{label}"] = round(
+                    train_metrics["f1_per_class"][i], 2
+                )
+                metrics_to_log[f"auroc/train/{label}"] = round(
+                    train_metrics["auroc_per_class"][i], 2
+                )
+                metrics_to_log[f"precision/test/{label}"] = round(
+                    test_metrics["precision_per_class"][i], 2
+                )
+                metrics_to_log[f"recall/test/{label}"] = round(
+                    test_metrics["recall_per_class"][i], 2
+                )
+                metrics_to_log[f"f1/test/{label}"] = round(
+                    test_metrics["f1_per_class"][i], 2
+                )
+                metrics_to_log[f"auroc/test/{label}"] = round(
+                    test_metrics["auroc_per_class"][i], 2
+                )
 
             mlflow.log_metrics(metrics_to_log, step=epoch)
 
@@ -374,7 +434,9 @@ def train(model: nn.Module,
         # would double-apply it and break training. See model/serving.py.
         # Log CPU-resident weights: torch.load() has no map_location by default, so a
         # CUDA-tagged checkpoint fails to deserialize on a GPU-less serving container.
-        python_model = SoftmaxClassifier(model=model.to("cpu"), class_names=class_labels)
+        python_model = SoftmaxClassifier(
+            model=model.to("cpu"), class_names=class_labels
+        )
 
         if tracking_uri is not None and tracking_uri.startswith("azureml://"):
             # azureml-mlflow only implements the classic MLflow API (<=2.16) -- it has no
@@ -407,10 +469,17 @@ def train(model: nn.Module,
                 try:
                     client.create_registered_model(registered_model_name)
                 except mlflow.exceptions.MlflowException as e:
-                    if e.error_code not in ("RESOURCE_ALREADY_EXISTS", "ALREADY_EXISTS"):
+                    if e.error_code not in (
+                        "RESOURCE_ALREADY_EXISTS",
+                        "ALREADY_EXISTS",
+                    ):
                         raise
-                source = RunsArtifactRepository.get_underlying_uri(f"runs:/{run_id}/model")
-                client.create_model_version(name=registered_model_name, source=source, run_id=run_id)
+                source = RunsArtifactRepository.get_underlying_uri(
+                    f"runs:/{run_id}/model"
+                )
+                client.create_model_version(
+                    name=registered_model_name, source=source, run_id=run_id
+                )
         else:
             mlflow.pyfunc.log_model(
                 name=run_name,

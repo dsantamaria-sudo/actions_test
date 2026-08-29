@@ -16,7 +16,12 @@ from utils.utils import train_step as run_train_step
 # The scalar metrics every step dict must expose (all Python floats).
 SCALAR_KEYS = ["loss", "acc", "precision", "recall", "f1", "auroc"]
 # The per-class variants (lists of length num_classes).
-PER_CLASS_KEYS = ["precision_per_class", "recall_per_class", "f1_per_class", "auroc_per_class"]
+PER_CLASS_KEYS = [
+    "precision_per_class",
+    "recall_per_class",
+    "f1_per_class",
+    "auroc_per_class",
+]
 EXPECTED_KEYS = set(SCALAR_KEYS) | set(PER_CLASS_KEYS)
 
 

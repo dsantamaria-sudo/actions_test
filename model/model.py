@@ -1,4 +1,3 @@
-
 import torch
 from torch import nn
 from torchvision.models import ConvNeXt_Small_Weights, convnext_small
@@ -76,29 +75,40 @@ class tinyConvNeXt(nn.Module):
     Trained from scratch (no pretrained weights) -- input size is flexible since the
     head pools adaptively instead of relying on a hardcoded flattened size."""
 
-    def __init__(self, input_features: int, output_features: int, hidden_units: int = 96, blocks_per_stage: int = 2):
+    def __init__(
+        self,
+        input_features: int,
+        output_features: int,
+        hidden_units: int = 96,
+        blocks_per_stage: int = 2,
+    ):
         super().__init__()
 
         self.stem = nn.Sequential(
             nn.Conv2d(input_features, hidden_units, kernel_size=4, stride=4),
-            LayerNorm2d(hidden_units))
+            LayerNorm2d(hidden_units),
+        )
 
         self.cnn_block_1 = nn.Sequential(
-            *[ConvNeXtBlock(hidden_units) for _ in range(blocks_per_stage)])
+            *[ConvNeXtBlock(hidden_units) for _ in range(blocks_per_stage)]
+        )
         self.downsample_1 = DownsampleLayer(hidden_units, hidden_units * 2)
 
         self.cnn_block_2 = nn.Sequential(
-            *[ConvNeXtBlock(hidden_units * 2) for _ in range(blocks_per_stage)])
+            *[ConvNeXtBlock(hidden_units * 2) for _ in range(blocks_per_stage)]
+        )
         self.downsample_2 = DownsampleLayer(hidden_units * 2, hidden_units * 4)
 
         self.cnn_block_3 = nn.Sequential(
-            *[ConvNeXtBlock(hidden_units * 4) for _ in range(blocks_per_stage)])
+            *[ConvNeXtBlock(hidden_units * 4) for _ in range(blocks_per_stage)]
+        )
 
         self.class_layer = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
             nn.Flatten(),
             nn.LayerNorm(hidden_units * 4),
-            nn.Linear(in_features=hidden_units * 4, out_features=output_features))
+            nn.Linear(in_features=hidden_units * 4, out_features=output_features),
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.stem(x)
@@ -113,33 +123,70 @@ class tinyVGG(nn.Module):
 
         super().__init__()
 
-        self.cnn_block_1 =  nn.Sequential(
-            nn.Conv2d(in_channels=input_features, out_channels=hidden_units, kernel_size=3, stride=1, padding=0),
+        self.cnn_block_1 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=input_features,
+                out_channels=hidden_units,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+            ),
             nn.ReLU(),
-            nn.Conv2d(in_channels=hidden_units, out_channels=hidden_units, kernel_size=3, stride=1, padding=0),
+            nn.Conv2d(
+                in_channels=hidden_units,
+                out_channels=hidden_units,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+            ),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2))
+            nn.MaxPool2d(kernel_size=2),
+        )
 
-        self.cnn_block_2 =  nn.Sequential(
-            nn.Conv2d(in_channels=hidden_units, out_channels=hidden_units, kernel_size=3, stride=1, padding=0),
+        self.cnn_block_2 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=hidden_units,
+                out_channels=hidden_units,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+            ),
             nn.ReLU(),
-            nn.Conv2d(in_channels=hidden_units, out_channels=hidden_units, kernel_size=3, stride=1, padding=0),
+            nn.Conv2d(
+                in_channels=hidden_units,
+                out_channels=hidden_units,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+            ),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2))    
+            nn.MaxPool2d(kernel_size=2),
+        )
 
-        self.cnn_block_3 =  nn.Sequential(
-            nn.Conv2d(in_channels=hidden_units, out_channels=hidden_units, kernel_size=3, stride=1, padding=0),
+        self.cnn_block_3 = nn.Sequential(
+            nn.Conv2d(
+                in_channels=hidden_units,
+                out_channels=hidden_units,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+            ),
             nn.ReLU(),
-            nn.Conv2d(in_channels=hidden_units, out_channels=hidden_units, kernel_size=3, stride=1, padding=0),
+            nn.Conv2d(
+                in_channels=hidden_units,
+                out_channels=hidden_units,
+                kernel_size=3,
+                stride=1,
+                padding=0,
+            ),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2))            
+            nn.MaxPool2d(kernel_size=2),
+        )
 
-        self.class_layer =  nn.Sequential(
+        self.class_layer = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(in_features=hidden_units*4*4, out_features=output_features))    
-
+            nn.Linear(in_features=hidden_units * 4 * 4, out_features=output_features),
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.class_layer(self.cnn_block_3(self.cnn_block_2(self.cnn_block_1(x))))
-
-
