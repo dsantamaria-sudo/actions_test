@@ -15,8 +15,8 @@ wheels/
 # folders
 data/food101/
 data/pizza_steak_sushi/
-docker/
-.dockerignore
+# docker/
+# .dockerignore
 container_app_deployment.zip
 mlruns/
 model/model_v1.py

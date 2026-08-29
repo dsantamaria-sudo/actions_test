@@ -28,3 +28,4 @@ jobs:
 
       - name: Run pytest
         run: uv run --group dev python -m pytest -q
+
