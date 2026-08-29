@@ -23,7 +23,7 @@ def main() -> None:
     try:
         model = mlflow.pytorch.load_model(artifacts_path)
         print("MODEL:", model)
-    except Exception:
+    except Exception: # noqa: BLE001
         traceback.print_exc()
 
 

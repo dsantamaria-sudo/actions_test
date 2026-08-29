@@ -79,6 +79,5 @@ def create_food101_dataloaders(data_dir, classes, train_transform, test_transfor
                                 num_workers=num_workers,
                                 shuffle=False)
 
-    class_dict = {c: i for i, c in enumerate(classes)}
 
-    return train_dataloader, test_dataloader, classes, class_dict
+    return train_dataloader, test_dataloader, classes

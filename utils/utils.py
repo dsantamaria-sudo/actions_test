@@ -22,10 +22,10 @@ from torchmetrics.classification import (
 
 
 def display_random_images(dataloader: torch.utils.data.DataLoader,
-                           classes: list[str] = None,
+                           classes: list[str] | None = None,
                            n: int = 10,
                            display_shape: bool = True,
-                           seed: int = None):
+                           seed: int | None = None):
 
     import matplotlib.pyplot as plt
 
@@ -217,7 +217,7 @@ def train(model: nn.Module,
           num_classes: int,
           class_names: list[str] | None = None,
           accuracy_fn: Callable = accuracy_fn,
-          loss_fn: nn.Module = nn.CrossEntropyLoss(),
+          loss_fn: nn.Module | None = None,
           epochs: int = 5,
           average: str = "macro",
           device: torch.device = "cpu",

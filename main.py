@@ -20,7 +20,7 @@ def main():
 
     #mlflow_tracking_uri = "http://localhost:5000"
     mlflow_tracking_uri = "https://aml-container.greencoast-3d77fdca.spaincentral.azurecontainerapps.io"
-    ml_client = MLClient(
+    ml_client = MLClient( # noqa: F841
         DefaultAzureCredential(),
         subscription_id="48ee8f92-9a0c-4ecd-b6ce-83845f85bf75",
         resource_group_name="AML",
