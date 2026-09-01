@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Docker Build & Push
 
 on:
   push:
@@ -10,20 +10,34 @@ on:
     paths:
       - "docker/**"
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      - name: Azure Login
+        uses: Azure/login@v3
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: ACR Login
+        run: az acr login --name amlscontainer
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Build image (check only, no push)
+      - name: Build and push image
         uses: docker/build-push-action@v6
         with:
           context: ./docker
           file: ./docker/Dockerfile
-          push: false
+          push: ${{ github.event_name == 'push' }}
+          tags: |
+            amlscontainer.azurecr.io/mlflow-server:${{ github.sha }}
+            amlscontainer.azurecr.io/mlflow-server:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
