@@ -1,15 +1,21 @@
-name: CI
+name: Azure Login Test
 
 on:
   push:
   pull_request:
 
-jobs:
+permissions:
+  id-token: write
+  contents: read
 
-  - name: Azure Login
-    uses: Azure/login@v3
-    with:
-      client-id: ${{ secrets.AZURE_CLIENT_ID }}
-      client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-      tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-      subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+jobs:
+  azure-login:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Azure Login
+        uses: Azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
