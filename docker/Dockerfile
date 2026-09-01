@@ -1,5 +1,7 @@
 FROM python:3.11-slim
 
+LABEL org.opencontainers.image.description="Self-hosted MLflow tracking server (Postgres backend + Azure Blob artifacts)"
+
 WORKDIR /mlflow
 
 RUN pip install --no-cache-dir \
