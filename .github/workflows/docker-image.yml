@@ -37,7 +37,7 @@ jobs:
           file: ./docker/Dockerfile
           push: ${{ github.event_name == 'push' }}
           tags: |
-            amlscontainer.azurecr.io/mlflow-server:${{ github.sha }}
-            amlscontainer.azurecr.io/mlflow-server:latest
+            amlscontainer2.azurecr.io/mlflow-server:${{ github.sha }}
+            amlscontainer2.azurecr.io/mlflow-server:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
