@@ -25,7 +25,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: ACR Login
-        run: az acr login --name amlscontainer
+        run: az acr login --name amlscontainer2
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
