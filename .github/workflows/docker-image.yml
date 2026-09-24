@@ -9,6 +9,7 @@ on:
     branches: [ "main" ]
     paths:
       - "docker/**"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -35,9 +36,9 @@ jobs:
         with:
           context: ./docker
           file: ./docker/Dockerfile
-          push: ${{ github.event_name == 'push' }}
+          push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
           tags: |
-            amlscontainer.azurecr.io/mlflow-server:${{ github.sha }}
-            amlscontainer.azurecr.io/mlflow-server:latest
+            amlscontainer2.azurecr.io/mlflow-server:${{ github.sha }}
+            amlscontainer2.azurecr.io/mlflow-server:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
