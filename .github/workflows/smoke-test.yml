@@ -1,0 +1,26 @@
+name: Endpoint Smoke Test
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    # Daily at 06:00 UTC
+    - cron: '0 6 * * *'
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run smoke test
+        env:
+          AZURE_ENDPOINT_URL: ${{ secrets.AZURE_ENDPOINT_URL }}
+          AZURE_ENDPOINT_KEY: ${{ secrets.AZURE_ENDPOINT_KEY }}
+        run: python tests/smoke/smoke_test.py
