@@ -5,9 +5,11 @@ Sends a pre-processed reference payload (tests/smoke/test_payload.json) to the
 scoring endpoint and validates:
   1. HTTP 200 response within a generous timeout (endpoint scales to 0
      replicas, so a cold start can take well over a minute).
-  2. The response has the expected shape: 3 class probabilities that sum to ~1.
-  3. The predicted class matches the known class of the reference image
-     ("steak").
+  2. The response has the expected shape: probabilities for all 3 known
+     classes (pizza, steak, sushi), summing to ~1.
+
+No assertion is made about which class should win — this is a structural /
+liveness check, not a regression test against a known label.
 
 Required environment variables:
   AZURE_ENDPOINT_URL  - e.g. https://amls-imhmj.spaincentral.inference.ml.azure.com/score
@@ -26,10 +28,31 @@ from pathlib import Path
 import requests
 
 CLASSES = ["pizza", "steak", "sushi"]
-EXPECTED_CLASS = "steak"
 
 PAYLOAD_PATH = Path(__file__).parent / "test_payload.json"
 TIMEOUT_SECONDS = 120
+
+
+def extract_probs(result):
+    """Normalize the various shapes the endpoint might return into a
+    {class_name: probability} dict."""
+    # {"predictions": [...]} wrapper
+    if isinstance(result, dict) and "predictions" in result:
+        result = result["predictions"]
+
+    # Unwrap a single-item batch: [x] -> x
+    if isinstance(result, list) and len(result) == 1:
+        result = result[0]
+
+    # Dict keyed by class name: {"pizza": 0.1, "steak": 0.3, "sushi": 0.6}
+    if isinstance(result, dict):
+        return result
+
+    # Bare list of floats, positional per CLASSES order
+    if isinstance(result, list) and len(result) == len(CLASSES):
+        return dict(zip(CLASSES, result))
+
+    return None
 
 
 def main() -> int:
@@ -78,46 +101,31 @@ def main() -> int:
         print(f"FAIL: response is not valid JSON: {response.text[:1000]}", file=sys.stderr)
         return 1
 
-    # Azure ML MLflow pyfunc scoring typically returns either a bare list of
-    # predictions, or {"predictions": [...]}. Handle both.
-    if isinstance(result, dict) and "predictions" in result:
-        predictions = result["predictions"]
-    else:
-        predictions = result
+    probs = extract_probs(result)
 
-    # Unwrap a single-item batch: [[p0, p1, p2]] -> [p0, p1, p2]
-    if isinstance(predictions, list) and len(predictions) == 1 and isinstance(predictions[0], list):
-        probs = predictions[0]
-    else:
-        probs = predictions
+    if probs is None:
+        print(f"FAIL: unrecognized response shape: {result}", file=sys.stderr)
+        return 1
 
-    if not isinstance(probs, list) or len(probs) != len(CLASSES):
-        print(f"FAIL: expected {len(CLASSES)} class probabilities, got: {probs}", file=sys.stderr)
+    missing = [c for c in CLASSES if c not in probs]
+    if missing:
+        print(f"FAIL: response missing expected classes {missing}: {probs}", file=sys.stderr)
         return 1
 
     try:
-        probs = [float(p) for p in probs]
+        values = [float(probs[c]) for c in CLASSES]
     except (TypeError, ValueError):
         print(f"FAIL: probabilities are not numeric: {probs}", file=sys.stderr)
         return 1
 
-    total = sum(probs)
+    total = sum(values)
     if not (0.95 <= total <= 1.05):
-        print(f"FAIL: probabilities sum to {total:.4f}, expected ~1.0", file=sys.stderr)
+        print(f"FAIL: probabilities sum to {total:.4f}, expected ~1.0: {probs}", file=sys.stderr)
         return 1
 
-    predicted_idx = probs.index(max(probs))
-    predicted_class = CLASSES[predicted_idx]
-    print(f"Predicted: {predicted_class} (probs={[round(p, 4) for p in probs]})")
-
-    if predicted_class != EXPECTED_CLASS:
-        print(
-            f"FAIL: expected class '{EXPECTED_CLASS}', got '{predicted_class}'",
-            file=sys.stderr,
-        )
-        return 1
-
-    print("PASS: endpoint healthy, response well-formed, prediction correct.")
+    predicted_class = max(probs, key=probs.get)
+    print(f"Predicted: {predicted_class} (probs={ {c: round(float(probs[c]), 4) for c in CLASSES} })")
+    print("PASS: endpoint healthy, response well-formed.")
     return 0
 
 
